@@ -35,16 +35,12 @@ RUN set -ex; \
     case "${BUILD_ARCH}" in \
       aarch64) GOARCH="arm64" ;; \
       amd64)   GOARCH="amd64" ;; \
+      armv7)   GOARCH="armv7" ;; \
       *)       echo "Unsupported arch: ${BUILD_ARCH}" && exit 1 ;; \
     esac; \
     BASE_URL="https://github.com/gesellix/Bose-SoundTouch/releases/download/v${BUILD_VERSION}"; \
-    # Try common naming conventions used by Go release tools (goreleaser)
     wget -q -O /usr/local/bin/soundtouch-service \
-        "${BASE_URL}/soundtouch-service_linux_${GOARCH}" \
-    || wget -q -O /usr/local/bin/soundtouch-service \
-        "${BASE_URL}/soundtouch-service-linux-${GOARCH}" \
-    || wget -q -O /usr/local/bin/soundtouch-service \
-        "${BASE_URL}/soundtouch-service_Linux_${GOARCH}"; \
+        "${BASE_URL}/soundtouch-service-v${BUILD_VERSION}-linux-${GOARCH}"; \
     chmod +x /usr/local/bin/soundtouch-service
 
 # Copy and install the run script
