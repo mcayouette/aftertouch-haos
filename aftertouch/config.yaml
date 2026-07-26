@@ -1,0 +1,86 @@
+name: "AfterTouch - Bose SoundTouch Service"
+version: "0.118.0"
+slug: "aftertouch"
+description: >-
+  Local Bose SoundTouch cloud replacement (AfterTouch soundtouch-service).
+  Restores presets, Spotify, Amazon Music, TuneIn, and stereo pairing after
+  the Bose cloud shutdown on May 6, 2026.
+url: "https://github.com/gesellix/Bose-SoundTouch"
+arch:
+  - aarch64
+  - amd64
+startup: services
+boot: auto
+init: false
+
+# Ports: 8000 = HTTP management UI + device API, 8443 = HTTPS, 53/udp = optional DNS discovery
+ports:
+  8000/tcp: 8000
+  8443/tcp: 8443
+  53/udp: null
+
+ports_description:
+  8000/tcp: "HTTP management UI and device API"
+  8443/tcp: "HTTPS (required for DNS/DHCP redirect migration)"
+  53/udp: "DNS discovery server (optional, enable in add-on settings)"
+
+# host_network gives the service access to mDNS/SSDP for automatic device discovery
+host_network: true
+
+# Persistent data lives in /data inside the container (mapped to add-on data volume)
+map:
+  - type: data
+
+webui: "http://[HOST]:[PORT:8000]/"
+watchdog: "http://[HOST]:[PORT:8000]/health"
+
+panel_icon: "mdi:speaker"
+panel_title: "AfterTouch"
+panel_admin: false
+
+options:
+  server_url: ""
+  https_server_url: ""
+  data_dir: "/data"
+  http_port: 8000
+  https_port: 8443
+  bind_addr: ""
+  enable_dns_discovery: false
+  dns_upstream: "8.8.8.8"
+  dns_bind_addr: ":53"
+  discovery_interval: "5m"
+  discovery_disabled: false
+  log_proxy_body: false
+  redact_proxy_logs: true
+  record_interactions: true
+  stockholm_dir: ""
+  marge_auth_token: ""
+  marge_account_id: ""
+
+schema:
+  server_url: "str?"
+  https_server_url: "str?"
+  data_dir: str
+  http_port: "port"
+  https_port: "port"
+  bind_addr: "str?"
+  enable_dns_discovery: bool
+  dns_upstream: str
+  dns_bind_addr: str
+  discovery_interval: str
+  discovery_disabled: bool
+  log_proxy_body: bool
+  redact_proxy_logs: bool
+  record_interactions: bool
+  stockholm_dir: "str?"
+  marge_auth_token: "str?"
+  marge_account_id: "str?"
+
+# Use the upstream ghcr.io image directly — no local build needed
+image: "ghcr.io/gesellix/bose-soundtouch"
+
+# Increase default timeout: the service starts quickly but we give it headroom
+timeout: 30
+
+# Keep add-on data directory when a backup snapshot is taken
+backup: hot

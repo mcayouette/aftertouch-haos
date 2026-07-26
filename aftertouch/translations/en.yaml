@@ -1,0 +1,92 @@
+configuration:
+  server_url:
+    name: Server URL (HTTP)
+    description: >-
+      Public HTTP URL of this service as seen from your speakers on the LAN,
+      e.g. http://homeassistant.local:8000. Leave empty to auto-detect.
+  https_server_url:
+    name: Server URL (HTTPS)
+    description: >-
+      Public HTTPS URL, e.g. https://homeassistant.local:8443. Required for
+      DNS/DHCP redirect migration. Derived from Server URL if empty.
+  data_dir:
+    name: Data directory
+    description: >-
+      Path inside the container where persistent data (presets, device configs,
+      interaction logs) is stored. Default /data maps to the add-on data volume.
+  http_port:
+    name: HTTP port
+    description: >-
+      Port the HTTP server listens on inside the container. Change only if 8000
+      is already in use; update the port mapping accordingly.
+  https_port:
+    name: HTTPS port
+    description: Port the HTTPS server listens on inside the container.
+  bind_addr:
+    name: Bind address
+    description: >-
+      Network interface to bind to (e.g. 0.0.0.0). Leave empty to bind to all
+      interfaces.
+  enable_dns_discovery:
+    name: Enable DNS discovery server
+    description: >-
+      Start the built-in DNS server that intercepts Bose cloud hostnames and
+      resolves them to this service. Required for DNS/DHCP redirect migration.
+      Enable the 53/UDP port mapping before turning this on.
+  dns_upstream:
+    name: Upstream DNS server
+    description: >-
+      Upstream resolver for non-Bose DNS queries when DNS discovery is active.
+      Default is 8.8.8.8 (Google). Use your router's IP to keep local DNS
+      working normally.
+  dns_bind_addr:
+    name: DNS bind address
+    description: >-
+      Address and port for the DNS discovery server, e.g. :53. Port 53 is
+      required for DNS/DHCP migration; non-standard ports work for testing only.
+  discovery_interval:
+    name: Discovery interval
+    description: >-
+      How often to scan the network for new SoundTouch devices.
+      Examples: 5m, 10m, 1h.
+  discovery_disabled:
+    name: Disable automatic discovery
+    description: >-
+      Set to true to stop the service from scanning the network automatically.
+      Devices can still be added manually through the web UI.
+  log_proxy_body:
+    name: Log proxy request/response bodies
+    description: >-
+      Log full HTTP request and response bodies for proxied traffic. For
+      development and troubleshooting only — generates a lot of output.
+  redact_proxy_logs:
+    name: Redact sensitive data in logs
+    description: >-
+      Mask authorization headers, tokens, and cookies in recorded .http
+      interaction files. Recommended to keep enabled.
+  record_interactions:
+    name: Record HTTP interactions
+    description: >-
+      Save all device interactions as .http files in the data directory.
+      Compatible with the IntelliJ HTTP Client for replay.
+  stockholm_dir:
+    name: Stockholm frontend directory
+    description: >-
+      Path inside the container to the extracted Stockholm app files. When set,
+      the full Bose SoundTouch app UI is served at the root URL. Leave empty to
+      use the built-in management UI instead.
+  marge_auth_token:
+    name: Marge auth token
+    description: >-
+      Pre-seeds the Stockholm session token so the first app launch skips the
+      login screen. Leave empty if not using the Stockholm frontend.
+  marge_account_id:
+    name: Marge account ID
+    description: >-
+      Pre-seeds the account ID used to filter device discovery results by Marge
+      account. Leave empty to see all discovered devices.
+
+network:
+  8000/tcp: HTTP management UI and Bose device API
+  8443/tcp: HTTPS (required for DNS/DHCP redirect migration)
+  53/udp: DNS discovery server (optional)
