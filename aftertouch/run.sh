@@ -45,10 +45,26 @@ fi
 # ── Ensure data directory exists ──────────────────────────────────────────────
 mkdir -p "${DATA_DIR}"
 
+# ── Symlink /app/data -> DATA_DIR ─────────────────────────────────────────────
+# The upstream binary has /app/data compiled in as its default DATA_DIR.
+# HA Supervisor mounts the persistent volume at /data (not /app/data), so we
+# symlink /app/data -> /data to ensure the binary always writes to the
+# persistent volume regardless of whether DATA_DIR env var takes effect.
+if [ ! -e /app/data ]; then
+    mkdir -p /app
+    ln -s "${DATA_DIR}" /app/data
+    bashio::log.info "Symlinked /app/data -> ${DATA_DIR}"
+elif [ ! -L /app/data ]; then
+    # /app/data exists as a real directory — move any contents into DATA_DIR then replace with symlink
+    cp -a /app/data/. "${DATA_DIR}/" 2>/dev/null || true
+    rm -rf /app/data
+    ln -s "${DATA_DIR}" /app/data
+    bashio::log.info "Replaced /app/data with symlink -> ${DATA_DIR}"
+fi
+
 # ── Rescue settings.json if it was written outside DATA_DIR ───────────────────
-# The upstream image default is DATA_DIR=/app/data. If a previous install
-# wrote settings.json to /data (old default), migrate it to the correct path.
-for CANDIDATE in /data/settings.json ./data/settings.json /settings.json; do
+# If a previous run wrote settings.json somewhere other than DATA_DIR, migrate it.
+for CANDIDATE in /app/data/settings.json ./data/settings.json /settings.json; do
     if [ -f "${CANDIDATE}" ] && [ "${CANDIDATE}" != "${DATA_DIR}/settings.json" ]; then
         bashio::log.warning "Found settings.json at ${CANDIDATE} — moving to ${DATA_DIR}/settings.json"
         mv "${CANDIDATE}" "${DATA_DIR}/settings.json"
