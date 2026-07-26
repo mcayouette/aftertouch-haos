@@ -65,16 +65,31 @@ export RECORD_INTERACTIONS="${RECORD_INTERACTIONS}"
 [ -n "${MARGE_AUTH_TOKEN}" ]  && export MARGE_AUTH_TOKEN
 [ -n "${MARGE_ACCOUNT_ID}" ]  && export MARGE_ACCOUNT_ID
 
-# ── Derive SERVER_URL from add-on hostname if not set by the user ─────────────
-# Default to homeassistant.local — the container $HOSTNAME is an internal
-# Docker name that speakers on the LAN cannot reach.
-if [ -z "${SERVER_URL}" ]; then
-    export SERVER_URL="http://homeassistant.local:${PORT}"
-    bashio::log.info "SERVER_URL not set — using default: ${SERVER_URL}"
-fi
+# ── SERVER_URL / HTTPS_SERVER_URL precedence ──────────────────────────────────
+# The AfterTouch web UI saves settings to DATA_DIR/settings.json, which the
+# service reads at startup with higher priority than env vars. To avoid
+# clobbering UI-saved settings on every restart, we only export SERVER_URL
+# when the user has set a non-default value in the add-on options.
+#
+# On first boot (no settings.json yet) we seed homeassistant.local so the
+# service starts with the correct LAN hostname rather than the internal
+# Docker container name.
+DEFAULT_SERVER_URL="http://homeassistant.local:${PORT}"
+DEFAULT_HTTPS_SERVER_URL="https://homeassistant.local:${HTTPS_PORT}"
+SETTINGS_FILE="${DATA_DIR}/settings.json"
 
-if [ -z "${HTTPS_SERVER_URL}" ]; then
-    export HTTPS_SERVER_URL="https://homeassistant.local:${HTTPS_PORT}"
+if [ -n "${SERVER_URL}" ] && [ "${SERVER_URL}" != "${DEFAULT_SERVER_URL}" ]; then
+    # User explicitly set a custom URL — always honour it
+    export SERVER_URL
+    export HTTPS_SERVER_URL="${HTTPS_SERVER_URL:-${DEFAULT_HTTPS_SERVER_URL}}"
+elif [ ! -f "${SETTINGS_FILE}" ]; then
+    # First boot — seed the default so the service doesn't use its internal hostname
+    export SERVER_URL="${DEFAULT_SERVER_URL}"
+    export HTTPS_SERVER_URL="${DEFAULT_HTTPS_SERVER_URL}"
+    bashio::log.info "First boot — seeding SERVER_URL: ${SERVER_URL}"
+else
+    # settings.json exists — let it take precedence, don't export SERVER_URL
+    bashio::log.info "settings.json found — SERVER_URL managed by AfterTouch UI"
 fi
 
 # ── Log startup info ──────────────────────────────────────────────────────────
