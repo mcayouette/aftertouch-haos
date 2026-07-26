@@ -46,9 +46,9 @@ fi
 mkdir -p "${DATA_DIR}"
 
 # ── Rescue settings.json if it was written outside DATA_DIR ───────────────────
-# The upstream service defaults DATA_DIR to ./data — if it ever wrote
-# settings.json there instead of /data, migrate it to the persistent volume.
-for CANDIDATE in /app/data/settings.json ./data/settings.json /settings.json; do
+# The upstream image default is DATA_DIR=/app/data. If a previous install
+# wrote settings.json to /data (old default), migrate it to the correct path.
+for CANDIDATE in /data/settings.json ./data/settings.json /settings.json; do
     if [ -f "${CANDIDATE}" ] && [ "${CANDIDATE}" != "${DATA_DIR}/settings.json" ]; then
         bashio::log.warning "Found settings.json at ${CANDIDATE} — moving to ${DATA_DIR}/settings.json"
         mv "${CANDIDATE}" "${DATA_DIR}/settings.json"
