@@ -24,7 +24,8 @@ RUN apk add --no-cache \
     bash \
     ca-certificates \
     wget \
-    tzdata
+    tzdata \
+    python3
 
 # Download the soundtouch-service binary for the target architecture.
 # Upstream release: https://github.com/gesellix/Bose-SoundTouch/releases/tag/v0.118.0

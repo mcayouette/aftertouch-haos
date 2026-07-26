@@ -3,44 +3,38 @@
 # shellcheck shell=bash
 set -e
 
-# ── Read options from /data/options.json via bashio ──────────────────────────
+# ── Read options — prefer bashio, fall back to jq on /data/options.json ──────
+OPTIONS_FILE="/data/options.json"
 
-DATA_DIR="$(bashio::config 'data_dir')"
-HTTP_PORT="$(bashio::config 'http_port')"
-HTTPS_PORT="$(bashio::config 'https_port')"
+get_option() {
+    local key="$1"
+    local default="${2:-}"
+    if bashio::api.supervisor GET /addons/self/options/config 2>/dev/null | grep -q "${key}" 2>/dev/null; then
+        bashio::config "${key}" "${default}" 2>/dev/null || echo "${default}"
+    elif [ -f "${OPTIONS_FILE}" ]; then
+        python3 -c "import json,sys; d=json.load(open('${OPTIONS_FILE}')); print(d.get('${key}','${default}'))" 2>/dev/null || echo "${default}"
+    else
+        echo "${default}"
+    fi
+}
 
-# Optional / may be empty — read raw value regardless of has_value
-SERVER_URL="$(bashio::config 'server_url' '')"
-HTTPS_SERVER_URL="$(bashio::config 'https_server_url' '')"
-
-BIND_ADDR=""
-if bashio::config.has_value 'bind_addr'; then
-    BIND_ADDR="$(bashio::config 'bind_addr')"
-fi
-
-ENABLE_DNS_DISCOVERY="$(bashio::config 'enable_dns_discovery')"
-DNS_UPSTREAM="$(bashio::config 'dns_upstream')"
-DNS_BIND_ADDR="$(bashio::config 'dns_bind_addr')"
-DISCOVERY_INTERVAL="$(bashio::config 'discovery_interval')"
-DISCOVERY_DISABLED="$(bashio::config 'discovery_disabled')"
-LOG_PROXY_BODY="$(bashio::config 'log_proxy_body')"
-REDACT_PROXY_LOGS="$(bashio::config 'redact_proxy_logs')"
-RECORD_INTERACTIONS="$(bashio::config 'record_interactions')"
-
-STOCKHOLM_DIR=""
-if bashio::config.has_value 'stockholm_dir'; then
-    STOCKHOLM_DIR="$(bashio::config 'stockholm_dir')"
-fi
-
-MARGE_AUTH_TOKEN=""
-if bashio::config.has_value 'marge_auth_token'; then
-    MARGE_AUTH_TOKEN="$(bashio::config 'marge_auth_token')"
-fi
-
-MARGE_ACCOUNT_ID=""
-if bashio::config.has_value 'marge_account_id'; then
-    MARGE_ACCOUNT_ID="$(bashio::config 'marge_account_id')"
-fi
+DATA_DIR="$(bashio::config 'data_dir' '/data' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(d.get('data_dir','/data'))" 2>/dev/null || echo '/data')"
+HTTP_PORT="$(bashio::config 'http_port' '8000' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(d.get('http_port','8000'))" 2>/dev/null || echo '8000')"
+HTTPS_PORT="$(bashio::config 'https_port' '8443' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(d.get('https_port','8443'))" 2>/dev/null || echo '8443')"
+SERVER_URL="$(bashio::config 'server_url' '' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(d.get('server_url',''))" 2>/dev/null || echo '')"
+HTTPS_SERVER_URL="$(bashio::config 'https_server_url' '' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(d.get('https_server_url',''))" 2>/dev/null || echo '')"
+BIND_ADDR="$(bashio::config 'bind_addr' '' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(d.get('bind_addr',''))" 2>/dev/null || echo '')"
+ENABLE_DNS_DISCOVERY="$(bashio::config 'enable_dns_discovery' 'false' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(str(d.get('enable_dns_discovery',False)).lower())" 2>/dev/null || echo 'false')"
+DNS_UPSTREAM="$(bashio::config 'dns_upstream' '8.8.8.8' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(d.get('dns_upstream','8.8.8.8'))" 2>/dev/null || echo '8.8.8.8')"
+DNS_BIND_ADDR="$(bashio::config 'dns_bind_addr' ':53' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(d.get('dns_bind_addr',':53'))" 2>/dev/null || echo ':53')"
+DISCOVERY_INTERVAL="$(bashio::config 'discovery_interval' '5m' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(d.get('discovery_interval','5m'))" 2>/dev/null || echo '5m')"
+DISCOVERY_DISABLED="$(bashio::config 'discovery_disabled' 'false' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(str(d.get('discovery_disabled',False)).lower())" 2>/dev/null || echo 'false')"
+LOG_PROXY_BODY="$(bashio::config 'log_proxy_body' 'false' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(str(d.get('log_proxy_body',False)).lower())" 2>/dev/null || echo 'false')"
+REDACT_PROXY_LOGS="$(bashio::config 'redact_proxy_logs' 'true' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(str(d.get('redact_proxy_logs',True)).lower())" 2>/dev/null || echo 'true')"
+RECORD_INTERACTIONS="$(bashio::config 'record_interactions' 'true' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(str(d.get('record_interactions',True)).lower())" 2>/dev/null || echo 'true')"
+STOCKHOLM_DIR="$(bashio::config 'stockholm_dir' '' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(d.get('stockholm_dir',''))" 2>/dev/null || echo '')"
+MARGE_AUTH_TOKEN="$(bashio::config 'marge_auth_token' '' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(d.get('marge_auth_token',''))" 2>/dev/null || echo '')"
+MARGE_ACCOUNT_ID="$(bashio::config 'marge_account_id' '' 2>/dev/null || python3 -c "import json; d=json.load(open('${OPTIONS_FILE}')); print(d.get('marge_account_id',''))" 2>/dev/null || echo '')"
 
 # ── Ensure data directory exists ──────────────────────────────────────────────
 mkdir -p "${DATA_DIR}"
