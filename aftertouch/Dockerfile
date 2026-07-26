@@ -51,4 +51,8 @@ RUN set -ex; \
 COPY run.sh /run.sh
 RUN chmod a+x /run.sh
 
+# Symlink /app/data -> /data so the binary's hardcoded default path
+# resolves to the HA Supervisor persistent volume mount point.
+RUN mkdir -p /app && ln -s /data /app/data
+
 CMD ["/run.sh"]
