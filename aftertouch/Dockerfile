@@ -15,7 +15,7 @@ FROM ${BUILD_FROM}
 
 # Labels required by Home Assistant Supervisor
 LABEL \
-  io.hass.version="0.118.0" \
+  io.hass.version="0.118.1" \
   io.hass.type="addon" \
   io.hass.arch="aarch64|amd64"
 
@@ -27,9 +27,9 @@ RUN apk add --no-cache \
     tzdata
 
 # Download the soundtouch-service binary for the target architecture.
-# Upstream release: https://github.com/gesellix/Bose-SoundTouch/releases/tag/v0.118.0
+# Upstream release: https://github.com/gesellix/Bose-SoundTouch/releases/tag/v0.118.1
 ARG BUILD_ARCH
-ARG BUILD_VERSION=0.118.0
+ARG BUILD_VERSION=0.118.1
 
 RUN set -ex; \
     case "${BUILD_ARCH}" in \
