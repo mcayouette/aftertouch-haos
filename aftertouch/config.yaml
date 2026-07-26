@@ -13,7 +13,10 @@ startup: services
 boot: auto
 init: false
 
-# Ports: 8000 = HTTP management UI + device API, 8443 = HTTPS, 53/udp = optional DNS discovery
+# Use the upstream pre-built image directly
+image: "ghcr.io/gesellix/bose-soundtouch"
+
+# Ports: 8000 = HTTP management UI + device API, 8443 = HTTPS, 53/udp = optional DNS
 ports:
   8000/tcp: 8000
   8443/tcp: 8443
@@ -22,16 +25,32 @@ ports:
 ports_description:
   8000/tcp: "HTTP management UI and device API"
   8443/tcp: "HTTPS (required for DNS/DHCP redirect migration)"
-  53/udp: "DNS discovery server (optional, enable in add-on settings)"
+  53/udp: "DNS discovery server (optional)"
 
 # host_network gives the service access to mDNS/SSDP for automatic device discovery
 host_network: true
 
-# Persistent data lives in /data inside the container (HA Supervisor standard mount)
-# run.sh symlinks /app/data -> /data so the upstream binary finds its data at
-# its compiled-in default path.
+# /data is always mounted and persistent — map it to /app/data where the binary expects it
 map:
   - type: data
+    path: /app/data
+
+# Static environment variables passed directly to the upstream container.
+# These set sensible defaults; the AfterTouch web UI settings.json takes
+# precedence over env vars at runtime, so UI changes persist across restarts.
+environment:
+  SERVER_URL: "http://homeassistant.local:8000"
+  HTTPS_SERVER_URL: "https://homeassistant.local:8443"
+  PORT: "8000"
+  HTTPS_PORT: "8443"
+  REDACT_PROXY_LOGS: "true"
+  RECORD_INTERACTIONS: "true"
+  LOG_PROXY_BODY: "false"
+  ENABLE_DNS_DISCOVERY: "false"
+  DNS_UPSTREAM: "8.8.8.8"
+  DNS_BIND_ADDR: ":53"
+  DISCOVERY_INTERVAL: "5m"
+  DISCOVERY_DISABLED: "false"
 
 webui: "http://[HOST]:[PORT:8000]/"
 watchdog: "http://[HOST]:[PORT:8000]/health"
@@ -40,49 +59,5 @@ panel_icon: "mdi:speaker"
 panel_title: "AfterTouch"
 panel_admin: false
 
-options:
-  server_url: "http://homeassistant.local:8000"
-  https_server_url: "https://homeassistant.local:8443"
-  data_dir: "/data"
-  http_port: 8000
-  https_port: 8443
-  bind_addr: ""
-  enable_dns_discovery: false
-  dns_upstream: "8.8.8.8"
-  dns_bind_addr: ":53"
-  discovery_interval: "5m"
-  discovery_disabled: false
-  log_proxy_body: false
-  redact_proxy_logs: true
-  record_interactions: true
-  stockholm_dir: ""
-  marge_auth_token: ""
-  marge_account_id: ""
-
-schema:
-  server_url: "str?"
-  https_server_url: "str?"
-  data_dir: str
-  http_port: "port"
-  https_port: "port"
-  bind_addr: "str?"
-  enable_dns_discovery: bool
-  dns_upstream: str
-  dns_bind_addr: str
-  discovery_interval: str
-  discovery_disabled: bool
-  log_proxy_body: bool
-  redact_proxy_logs: bool
-  record_interactions: bool
-  stockholm_dir: "str?"
-  marge_auth_token: "str?"
-  marge_account_id: "str?"
-
-# Build from the local Dockerfile (downloads upstream binary + runs run.sh)
-# This ensures our run.sh executes on startup for proper config and persistence.
-
-# Increase default timeout: the service starts quickly but we give it headroom
 timeout: 30
-
-# Keep add-on data directory when a backup snapshot is taken
 backup: hot

@@ -37,25 +37,23 @@ your Bose SoundTouch speakers full local control — no Bose cloud required.
 
 ## Configuration options
 
+Settings saved via the AfterTouch web UI **Settings** tab are stored in
+`/app/data/settings.json` and take highest precedence over the defaults below.
+To reset a setting, edit or delete that file from the add-on's data directory.
+
 | Option | Default | Description |
 |---|---|---|
-| `server_url` | *(auto)* | Public HTTP URL of this service. Defaults to `http://<hostname>:8000`. Set this to the stable hostname/IP your speakers can reach. |
-| `https_server_url` | *(auto)* | Public HTTPS URL. Derived from `server_url` if not set. Required for DNS/DHCP migration. |
-| `data_dir` | `/data` | Persistent data directory (presets, device configs, interaction logs). **Do not change** unless you know what you are doing. |
-| `http_port` | `8000` | HTTP port. Change only if 8000 is occupied. Update `ports` accordingly. |
-| `https_port` | `8443` | HTTPS port. |
-| `bind_addr` | *(all interfaces)* | Interface to bind to, e.g. `0.0.0.0`. Rarely needed. |
-| `enable_dns_discovery` | `false` | Enable built-in DNS server. Required for DNS/DHCP redirect migration (the most robust method). Binds to UDP 53 — enable the `53/udp` port mapping first. |
-| `dns_upstream` | `8.8.8.8` | Upstream DNS server for non-Bose queries when DNS discovery is enabled. |
-| `dns_bind_addr` | `:53` | Address/port for the DNS server. |
-| `discovery_interval` | `5m` | How often to scan for new devices. |
-| `discovery_disabled` | `false` | Set to `true` to disable automatic device scanning. |
-| `log_proxy_body` | `false` | Log full request/response bodies (development only). |
-| `redact_proxy_logs` | `true` | Redact tokens and credentials from recorded `.http` files. |
-| `record_interactions` | `true` | Save all device interactions as replay-able `.http` files. |
-| `stockholm_dir` | *(disabled)* | Path to the Stockholm frontend files (optional Bose app UI). See below. |
-| `marge_auth_token` | *(empty)* | Pre-seed the Marge auth token to skip the first login screen. |
-| `marge_account_id` | *(empty)* | Pre-seed the account ID for device discovery filtering. |
+| `SERVER_URL` | `http://homeassistant.local:8000` | Public HTTP URL of this service. Edit in the AfterTouch UI Settings tab. |
+| `HTTPS_SERVER_URL` | `https://homeassistant.local:8443` | Public HTTPS URL. Required for DNS/DHCP migration. |
+| `PORT` | `8000` | HTTP port. |
+| `HTTPS_PORT` | `8443` | HTTPS port. |
+| `ENABLE_DNS_DISCOVERY` | `false` | Enable built-in DNS server. Requires `53/udp` port mapping. |
+| `DNS_UPSTREAM` | `8.8.8.8` | Upstream DNS for non-Bose queries. |
+| `DISCOVERY_INTERVAL` | `5m` | How often to scan for new devices. |
+| `DISCOVERY_DISABLED` | `false` | Disable automatic device scanning. |
+| `LOG_PROXY_BODY` | `false` | Log full request/response bodies (development only). |
+| `REDACT_PROXY_LOGS` | `true` | Redact tokens from recorded `.http` files. |
+| `RECORD_INTERACTIONS` | `true` | Save device interactions as replay-able `.http` files. |
 
 ---
 
@@ -130,8 +128,8 @@ entities.
 - **Migration fails**: Confirm SSH is enabled on the speaker (USB stick trick)
   or try the telnet method instead.
 - **Settings not taking effect**: Changes made via the web UI `Settings` tab are
-  stored in `/data/settings.json` and take precedence over add-on options.
-  Edit or delete that file if you need to reset to option values.
+  stored in `/app/data/settings.json` and take precedence over environment
+  variables. Edit or delete that file if you need to reset to defaults.
 - **DNS not binding**: Port 53/UDP requires the port mapping to be enabled in
   the add-on network settings.
 
