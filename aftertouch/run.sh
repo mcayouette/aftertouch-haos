@@ -45,6 +45,17 @@ fi
 # ── Ensure data directory exists ──────────────────────────────────────────────
 mkdir -p "${DATA_DIR}"
 
+# ── Rescue settings.json if it was written outside DATA_DIR ───────────────────
+# The upstream service defaults DATA_DIR to ./data — if it ever wrote
+# settings.json there instead of /data, migrate it to the persistent volume.
+for CANDIDATE in /app/data/settings.json ./data/settings.json /settings.json; do
+    if [ -f "${CANDIDATE}" ] && [ "${CANDIDATE}" != "${DATA_DIR}/settings.json" ]; then
+        bashio::log.warning "Found settings.json at ${CANDIDATE} — moving to ${DATA_DIR}/settings.json"
+        mv "${CANDIDATE}" "${DATA_DIR}/settings.json"
+        break
+    fi
+done
+
 # ── Build environment for soundtouch-service ─────────────────────────────────
 export PORT="${HTTP_PORT}"
 export HTTPS_PORT="${HTTPS_PORT}"
@@ -58,38 +69,26 @@ export LOG_PROXY_BODY="${LOG_PROXY_BODY}"
 export REDACT_PROXY_LOGS="${REDACT_PROXY_LOGS}"
 export RECORD_INTERACTIONS="${RECORD_INTERACTIONS}"
 
-[ -n "${SERVER_URL}" ]        && export SERVER_URL
-[ -n "${HTTPS_SERVER_URL}" ]  && export HTTPS_SERVER_URL
 [ -n "${BIND_ADDR}" ]         && export BIND_ADDR
 [ -n "${STOCKHOLM_DIR}" ]     && export STOCKHOLM_DIR
 [ -n "${MARGE_AUTH_TOKEN}" ]  && export MARGE_AUTH_TOKEN
 [ -n "${MARGE_ACCOUNT_ID}" ]  && export MARGE_ACCOUNT_ID
 
-# ── SERVER_URL / HTTPS_SERVER_URL precedence ──────────────────────────────────
-# The AfterTouch web UI saves settings to DATA_DIR/settings.json, which the
-# service reads at startup with higher priority than env vars. To avoid
-# clobbering UI-saved settings on every restart, we only export SERVER_URL
-# when the user has set a non-default value in the add-on options.
-#
-# On first boot (no settings.json yet) we seed homeassistant.local so the
-# service starts with the correct LAN hostname rather than the internal
-# Docker container name.
-DEFAULT_SERVER_URL="http://homeassistant.local:${PORT}"
-DEFAULT_HTTPS_SERVER_URL="https://homeassistant.local:${HTTPS_PORT}"
-SETTINGS_FILE="${DATA_DIR}/settings.json"
-
-if [ -n "${SERVER_URL}" ] && [ "${SERVER_URL}" != "${DEFAULT_SERVER_URL}" ]; then
-    # User explicitly set a custom URL — always honour it
+# ── SERVER_URL / HTTPS_SERVER_URL ─────────────────────────────────────────────
+# Always export a LAN-reachable URL so the service never falls back to the
+# internal Docker container hostname (e.g. 96e6f0a4-aftertouch).
+# If the user has saved a custom URL via the AfterTouch web UI, settings.json
+# takes highest precedence and will override this env var at runtime.
+if [ -n "${SERVER_URL}" ]; then
     export SERVER_URL
-    export HTTPS_SERVER_URL="${HTTPS_SERVER_URL:-${DEFAULT_HTTPS_SERVER_URL}}"
-elif [ ! -f "${SETTINGS_FILE}" ]; then
-    # First boot — seed the default so the service doesn't use its internal hostname
-    export SERVER_URL="${DEFAULT_SERVER_URL}"
-    export HTTPS_SERVER_URL="${DEFAULT_HTTPS_SERVER_URL}"
-    bashio::log.info "First boot — seeding SERVER_URL: ${SERVER_URL}"
 else
-    # settings.json exists — let it take precedence, don't export SERVER_URL
-    bashio::log.info "settings.json found — SERVER_URL managed by AfterTouch UI"
+    export SERVER_URL="http://homeassistant.local:${PORT}"
+fi
+
+if [ -n "${HTTPS_SERVER_URL}" ]; then
+    export HTTPS_SERVER_URL
+else
+    export HTTPS_SERVER_URL="https://homeassistant.local:${HTTPS_PORT}"
 fi
 
 # ── Log startup info ──────────────────────────────────────────────────────────
