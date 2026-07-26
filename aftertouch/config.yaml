@@ -39,8 +39,8 @@ panel_title: "AfterTouch"
 panel_admin: false
 
 options:
-  server_url: ""
-  https_server_url: ""
+  server_url: "http://homeassistant.local:8000"
+  https_server_url: "https://homeassistant.local:8443"
   data_dir: "/data"
   http_port: 8000
   https_port: 8443
