@@ -78,7 +78,7 @@ if [ -z "${HTTPS_SERVER_URL}" ]; then
 fi
 
 # ── Log startup info ──────────────────────────────────────────────────────────
-bashio::log.info "Starting AfterTouch soundtouch-service v0.118.1"
+bashio::log.info "Starting AfterTouch soundtouch-service v0.118.0"
 bashio::log.info "  HTTP  : ${SERVER_URL}"
 bashio::log.info "  HTTPS : ${HTTPS_SERVER_URL}"
 bashio::log.info "  Data  : ${DATA_DIR}"

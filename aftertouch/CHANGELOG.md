@@ -1,12 +1,5 @@
 # Changelog
 
-## 0.118.1 — 2026-07-26
-
-### Fixed
-- Default `SERVER_URL` now always resolves to `http://homeassistant.local:8000`
-  instead of the internal Docker container hostname, ensuring speakers on the
-  LAN can reach the service without manual configuration.
-
 ## 0.118.0 — 2026-07-26
 
 ### Initial release
