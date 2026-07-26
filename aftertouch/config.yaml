@@ -78,8 +78,8 @@ schema:
   marge_auth_token: "str?"
   marge_account_id: "str?"
 
-# Use the upstream ghcr.io image directly — no local build needed
-image: "ghcr.io/gesellix/bose-soundtouch"
+# Build from the local Dockerfile (downloads upstream binary + runs run.sh)
+# This ensures our run.sh executes on startup for proper config and persistence.
 
 # Increase default timeout: the service starts quickly but we give it headroom
 timeout: 30
