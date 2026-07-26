@@ -1,5 +1,5 @@
 name: "AfterTouch - Bose SoundTouch Service"
-version: "0.118.0"
+version: "0.0.10"
 slug: "aftertouch"
 description: >-
   Local Bose SoundTouch cloud replacement (AfterTouch soundtouch-service).
