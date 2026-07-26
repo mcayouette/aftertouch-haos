@@ -9,16 +9,9 @@ DATA_DIR="$(bashio::config 'data_dir')"
 HTTP_PORT="$(bashio::config 'http_port')"
 HTTPS_PORT="$(bashio::config 'https_port')"
 
-# Optional / may be empty
-SERVER_URL=""
-if bashio::config.has_value 'server_url'; then
-    SERVER_URL="$(bashio::config 'server_url')"
-fi
-
-HTTPS_SERVER_URL=""
-if bashio::config.has_value 'https_server_url'; then
-    HTTPS_SERVER_URL="$(bashio::config 'https_server_url')"
-fi
+# Optional / may be empty — read raw value regardless of has_value
+SERVER_URL="$(bashio::config 'server_url' '')"
+HTTPS_SERVER_URL="$(bashio::config 'https_server_url' '')"
 
 BIND_ADDR=""
 if bashio::config.has_value 'bind_addr'; then
@@ -73,19 +66,15 @@ export RECORD_INTERACTIONS="${RECORD_INTERACTIONS}"
 [ -n "${MARGE_ACCOUNT_ID}" ]  && export MARGE_ACCOUNT_ID
 
 # ── Derive SERVER_URL from add-on hostname if not set by the user ─────────────
-# Home Assistant Green (and other HA OS devices) exposes the host as
-# homeassistant.local; we use that as a sensible default so devices can
-# reach the service on the LAN without extra configuration.
+# Default to homeassistant.local — the container $HOSTNAME is an internal
+# Docker name that speakers on the LAN cannot reach.
 if [ -z "${SERVER_URL}" ]; then
-    # Try to pick up the supervisor hostname; fall back to homeassistant.local
-    HOST_ADDR="${HOSTNAME:-homeassistant.local}"
-    export SERVER_URL="http://${HOST_ADDR}:${PORT}"
-    bashio::log.info "SERVER_URL not set — using derived value: ${SERVER_URL}"
+    export SERVER_URL="http://homeassistant.local:${PORT}"
+    bashio::log.info "SERVER_URL not set — using default: ${SERVER_URL}"
 fi
 
 if [ -z "${HTTPS_SERVER_URL}" ]; then
-    HOST_ADDR="${HOSTNAME:-homeassistant.local}"
-    export HTTPS_SERVER_URL="https://${HOST_ADDR}:${HTTPS_PORT}"
+    export HTTPS_SERVER_URL="https://homeassistant.local:${HTTPS_PORT}"
 fi
 
 # ── Log startup info ──────────────────────────────────────────────────────────
