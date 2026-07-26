@@ -5,7 +5,7 @@ description: >-
   Local Bose SoundTouch cloud replacement (AfterTouch soundtouch-service).
   Restores presets, Spotify, Amazon Music, TuneIn, and stereo pairing after
   the Bose cloud shutdown on May 6, 2026.
-url: "https://github.com/gesellix/Bose-SoundTouch"
+url: "https://github.com/mcayouette/aftertouch-haos"
 arch:
   - aarch64
   - amd64
