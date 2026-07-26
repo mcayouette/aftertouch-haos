@@ -1,5 +1,5 @@
 name: "AfterTouch - Bose SoundTouch Service"
-version: "0.0.10"
+version: "0.0.11"
 slug: "aftertouch"
 description: >-
   Local Bose SoundTouch cloud replacement (AfterTouch soundtouch-service).
@@ -14,7 +14,7 @@ boot: auto
 init: false
 
 # Use the upstream pre-built image directly
-image: "ghcr.io/gesellix/bose-soundtouch"
+image: "ghcr.io/gesellix/bose-soundtouch:latest"
 
 # Ports: 8000 = HTTP management UI + device API, 8443 = HTTPS, 53/udp = optional DNS
 ports:

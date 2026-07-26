@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.11 — 2026-07-26
+
+### Changed
+- Pin upstream image to `ghcr.io/gesellix/bose-soundtouch:latest` so the
+  add-on always runs the newest upstream release without requiring a version bump
+
 ## 0.0.10 — 2026-07-26
 
 ### Initial release

@@ -1,11 +1,11 @@
 # AfterTouch — Home Assistant Add-on
 
-[![Release](https://img.shields.io/badge/version-0.0.10-blue)](https://github.com/gesellix/Bose-SoundTouch/releases/tag/v0.0.10)
+[![Release](https://img.shields.io/badge/version-0.0.11-blue)](https://github.com/gesellix/Bose-SoundTouch/releases/tag/v0.0.11)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Home Assistant add-on that runs
 [**AfterTouch `soundtouch-service`**](https://github.com/gesellix/Bose-SoundTouch)
-v0.0.10 — a local replacement for the Bose SoundTouch cloud, which was shut
+v0.0.11 — a local replacement for the Bose SoundTouch cloud, which was shut
 down on May 6, 2026.
 
 ## Features

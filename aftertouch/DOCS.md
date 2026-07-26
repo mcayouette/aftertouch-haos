@@ -2,7 +2,7 @@
 
 **AfterTouch** is a local replacement for the Bose SoundTouch cloud services,
 which were shut down on **May 6, 2026**. This add-on runs
-[`soundtouch-service`](https://github.com/gesellix/Bose-SoundTouch) v0.0.10
+[`soundtouch-service`](https://github.com/gesellix/Bose-SoundTouch) v0.0.11
 directly on your Home Assistant Green (or any Home Assistant OS device), giving
 your Bose SoundTouch speakers full local control — no Bose cloud required.
 
